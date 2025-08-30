@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "title": "Clean Water Initiative Funded",
+    "description": "Thanks to community donations, we've successfully funded a clean water project in rural Kenya, providing access to safe drinking water for over 500 families.",
+    "amount": "$12,500",
+    "date": "2024-01-15",
+    "image": "/placeholder.svg?height=200&width=300",
+    "category": "Water Access"
+  },
+  {
+    "id": 2,
+    "title": "Educational Scholarships Awarded",
+    "description": "Our scholarship program has awarded 25 students with full educational support, enabling them to pursue higher education and break the cycle of poverty.",
+    "amount": "$8,750",
+    "date": "2024-01-10",
+    "image": "/placeholder.svg?height=200&width=300",
+    "category": "Education"
+  },
+  {
+    "id": 3,
+    "title": "Reforestation Project Completed",
+    "description": "Community-funded reforestation efforts have successfully planted 10,000 trees, contributing to carbon offset and biodiversity restoration.",
+    "amount": "$6,200",
+    "date": "2024-01-08",
+    "image": "/placeholder.svg?height=200&width=300",
+    "category": "Environment"
+  },
+  {
+    "id": 4,
+    "title": "Medical Supplies Delivered",
+    "description": "Emergency medical supplies have been delivered to remote healthcare facilities, ensuring critical care for underserved communities.",
+    "amount": "$15,300",
+    "date": "2024-01-05",
+    "image": "/placeholder.svg?height=200&width=300",
+    "category": "Healthcare"
+  },
+  {
+    "id": 5,
+    "title": "Solar Power Installation",
+    "description": "Solar panels installed in 3 villages, providing clean energy access to 200+ households and reducing reliance on fossil fuels.",
+    "amount": "$22,100",
+    "date": "2024-01-02",
+    "image": "/placeholder.svg?height=200&width=300",
+    "category": "Energy"
+  }
+]
