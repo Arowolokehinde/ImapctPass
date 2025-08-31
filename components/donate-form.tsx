@@ -1,31 +1,73 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useWallet } from "@/contexts/wallet-context"
+import { useContracts } from "@/hooks/use-contracts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Loader2, CheckCircle, AlertCircle, Coins } from "lucide-react"
 import { SUPPORTED_TOKENS, type SupportedToken } from "@/lib/contracts"
 import { useToast } from "@/hooks/use-toast"
 
 export function DonateForm() {
   const { address, isConnected } = useWallet()
   const { toast } = useToast()
-  const [selectedToken, setSelectedToken] = useState<SupportedToken>("USDC")
+  const {
+    loading,
+    error,
+    tokenBalance,
+    donorInfo,
+    hasImpactPass,
+    donate,
+    approveTokens,
+    mintTokens,
+    checkAllowance,
+    clearError
+  } = useContracts()
+
+  const [selectedToken, setSelectedToken] = useState<SupportedToken>("MOCK_USDC")
   const [amount, setAmount] = useState("")
   const [step, setStep] = useState<"input" | "approve" | "donate" | "success">("input")
   const [isProcessing, setIsProcessing] = useState(false)
+  const [needsApproval, setNeedsApproval] = useState(false)
 
   const tokenConfig = SUPPORTED_TOKENS[selectedToken]
-
-  // Mock balance and allowance for demo
-  const mockBalance = "1000.00"
-  const hasBalance = Number.parseFloat(amount || "0") <= Number.parseFloat(mockBalance)
+  const hasBalance = Number.parseFloat(amount || "0") <= Number.parseFloat(tokenBalance)
   const isValidAmount = amount && Number.parseFloat(amount) > 0
+
+  // Check if approval is needed when amount changes
+  useEffect(() => {
+    const checkApproval = async () => {
+      if (isValidAmount && isConnected) {
+        const hasAllowance = await checkAllowance(amount)
+        setNeedsApproval(!hasAllowance)
+      }
+    }
+    checkApproval()
+  }, [amount, isValidAmount, isConnected, checkAllowance])
+
+  const handleMintTokens = async () => {
+    try {
+      setIsProcessing(true)
+      await mintTokens("1000") // Mint 1000 tokens for testing
+      toast({
+        title: "Tokens Minted!",
+        description: "1000 Mock USDC tokens have been minted to your wallet.",
+      })
+    } catch (error) {
+      toast({
+        title: "Mint Failed",
+        description: error instanceof Error ? error.message : "Failed to mint tokens",
+        variant: "destructive",
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   const handleApprove = async () => {
     if (!isValidAmount) return
@@ -33,11 +75,11 @@ export function DonateForm() {
     try {
       setStep("approve")
       setIsProcessing(true)
+      clearError()
 
-      // Mock approval process
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      setIsProcessing(false)
+      await approveTokens(amount)
+      setNeedsApproval(false)
+      
       toast({
         title: "Approval Successful",
         description: "You can now proceed with your donation.",
@@ -47,10 +89,11 @@ export function DonateForm() {
       console.error("Approve error:", error)
       toast({
         title: "Approval Failed",
-        description: "Failed to approve token spending. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to approve token spending",
         variant: "destructive",
       })
       setStep("input")
+    } finally {
       setIsProcessing(false)
     }
   }
@@ -61,12 +104,11 @@ export function DonateForm() {
     try {
       setStep("donate")
       setIsProcessing(true)
+      clearError()
 
-      // Mock donation process
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-
+      await donate(amount)
+      
       setStep("success")
-      setIsProcessing(false)
       toast({
         title: "Donation Successful!",
         description: "Thank you for your contribution to making a positive impact.",
@@ -75,10 +117,11 @@ export function DonateForm() {
       console.error("Donate error:", error)
       toast({
         title: "Donation Failed",
-        description: "Failed to process donation. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to process donation",
         variant: "destructive",
       })
       setStep("input")
+    } finally {
       setIsProcessing(false)
     }
   }
@@ -177,9 +220,21 @@ export function DonateForm() {
               </Badge>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Balance: {mockBalance} {tokenConfig.symbol}
-          </p>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Balance: {tokenBalance} {tokenConfig.symbol}</span>
+            {Number.parseFloat(tokenBalance) === 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMintTokens}
+                disabled={isProcessing}
+                className="h-6 px-2 text-xs"
+              >
+                <Coins className="w-3 h-3 mr-1" />
+                Mint Test Tokens
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Quick Amount Buttons */}
@@ -205,25 +260,53 @@ export function DonateForm() {
           </div>
         )}
 
-        {/* Action Button */}
+        {/* Error Display */}
+        {error && (
+          <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
+
+        {/* Action Buttons */}
         <div className="space-y-3">
-          <Button onClick={handleDonate} disabled={!isValidAmount || !hasBalance || isProcessing} className="w-full">
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {step === "approve" ? "Approving..." : step === "donate" ? "Processing..." : "Loading..."}
-              </>
-            ) : (
-              `Donate ${amount || "0"} ${tokenConfig.symbol}`
-            )}
-          </Button>
+          {needsApproval && isValidAmount ? (
+            <Button onClick={handleApprove} disabled={!hasBalance || isProcessing || loading} className="w-full">
+              {isProcessing && step === "approve" ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                `Approve ${amount} ${tokenConfig.symbol}`
+              )}
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleDonate} 
+              disabled={!isValidAmount || !hasBalance || isProcessing || loading || needsApproval} 
+              className="w-full"
+            >
+              {isProcessing && step === "donate" ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Donate ${amount || "0"} ${tokenConfig.symbol}`
+              )}
+            </Button>
+          )}
         </div>
 
         {/* Info */}
         <div className="text-xs text-muted-foreground space-y-1">
-          <p>• First-time donors receive an ImpactPass NFT</p>
+          <p>• First-time donors receive an ImpactPass NFT {hasImpactPass && "✅"}</p>
           <p>• All donations go directly to verified impact projects</p>
           <p>• Track your impact on the dashboard</p>
+          {donorInfo && (
+            <p>• Your total donated: {(Number(donorInfo.totalDonated) / 1e18).toFixed(2)} {tokenConfig.symbol}</p>
+          )}
         </div>
       </CardContent>
     </Card>
