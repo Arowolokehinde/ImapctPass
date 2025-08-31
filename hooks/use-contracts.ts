@@ -83,7 +83,7 @@ export function useContracts() {
       setError(null)
 
       // Check allowance first
-      const allowance = await ContractService.getTokenAllowance(address, process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x1234567890123456789012345678901234567890")
+      const allowance = await ContractService.getTokenAllowance(address, process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x0f804BB7b789fd677b75eF50fBAb708E0945bF1b")
       const requiredAmount = BigInt(amount) * BigInt(10 ** 18) // Convert to wei
 
       if (allowance < requiredAmount) {
@@ -165,7 +165,7 @@ export function useContracts() {
     if (!address || !isConnected) return false
 
     try {
-      const allowance = await ContractService.getTokenAllowance(address, process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x1234567890123456789012345678901234567890")
+      const allowance = await ContractService.getTokenAllowance(address, process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x0f804BB7b789fd677b75eF50fBAb708E0945bF1b")
       const requiredAmount = BigInt(amount) * BigInt(10 ** 18) // Convert to wei
       return allowance >= requiredAmount
     } catch (err) {

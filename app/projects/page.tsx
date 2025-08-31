@@ -6,10 +6,17 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { CheckCircle, Users, Calendar, TrendingUp } from "lucide-react"
+import { CheckCircle, Users, Calendar, TrendingUp, Loader2, Wallet } from "lucide-react"
+import { useWallet } from "@/contexts/wallet-context"
+import { useContracts } from "@/hooks/use-contracts"
+import { toast } from "sonner"
 
 export default function ProjectsPage() {
   const [selectedTier, setSelectedTier] = useState<{ [key: number]: string }>({})
+  const [donatingTo, setDonatingTo] = useState<number | null>(null)
+  
+  const { address, isConnected, connectWallet } = useWallet()
+  const { donate, approveTokens, checkAllowance, loading, error, clearError } = useContracts()
 
   const projects = [
     {
@@ -80,9 +87,48 @@ export default function ProjectsPage() {
     },
   ]
 
-  const handleSubscribe = (projectId: number, tier: string) => {
-    // This would integrate with the wallet context and smart contracts
-    console.log(`[v0] Subscribing to project ${projectId} with tier ${tier}`)
+  const handleSubscribe = async (projectId: number, tierName: string) => {
+    if (!isConnected || !address) {
+      toast.error("Please connect your wallet first")
+      return
+    }
+
+    const project = projects.find(p => p.id === projectId)
+    const tier = project?.subscriptionTiers.find(t => t.name === tierName)
+    
+    if (!tier) {
+      toast.error("Invalid subscription tier")
+      return
+    }
+
+    try {
+      setDonatingTo(projectId)
+      clearError()
+
+      // Check if user has sufficient allowance
+      const hasAllowance = await checkAllowance(tier.amount.toString())
+      
+      if (!hasAllowance) {
+        toast.info("Approving tokens for donation...")
+        
+        // Approve tokens first
+        await approveTokens(tier.amount.toString())
+        toast.success("Tokens approved successfully!")
+      }
+
+      // Execute the donation
+      toast.info("Processing donation...")
+      await donate(tier.amount.toString())
+      
+      toast.success(`Successfully subscribed as ${tierName} to ${project?.title}! 🎉`)
+      
+    } catch (err) {
+      console.error('Donation error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Donation failed'
+      toast.error(`Donation failed: ${errorMessage}`)
+    } finally {
+      setDonatingTo(null)
+    }
   }
 
   return (
@@ -115,7 +161,7 @@ export default function ProjectsPage() {
                         Verified
                       </Badge>
                     )}
-                    <Badge variant="secondary">{project.category}</Badge>
+                    <Badge className="bg-secondary text-secondary-foreground">{project.category}</Badge>
                   </div>
                 </div>
 
@@ -195,17 +241,35 @@ export default function ProjectsPage() {
                     <span>Last update: {project.lastUpdate}</span>
                   </div>
 
-                  <Button
-                    className="w-full mt-auto"
-                    onClick={() =>
-                      handleSubscribe(project.id, selectedTier[project.id] || project.subscriptionTiers[0].name)
-                    }
-                    disabled={!selectedTier[project.id]}
-                  >
-                    {selectedTier[project.id]
-                      ? `Subscribe as ${selectedTier[project.id]}`
-                      : "Select a tier to subscribe"}
-                  </Button>
+                  {!isConnected ? (
+                    <Button
+                      className="w-full mt-auto"
+                      onClick={connectWallet}
+                      variant="outline"
+                    >
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Connect Wallet to Subscribe
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full mt-auto"
+                      onClick={() =>
+                        handleSubscribe(project.id, selectedTier[project.id] || project.subscriptionTiers[0].name)
+                      }
+                      disabled={!selectedTier[project.id] || donatingTo === project.id}
+                    >
+                      {donatingTo === project.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : selectedTier[project.id] ? (
+                        `Subscribe as ${selectedTier[project.id]}`
+                      ) : (
+                        "Select a tier to subscribe"
+                      )}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </FadeIn>
