@@ -201,14 +201,14 @@ export function ContractDashboard() {
               <div>
                 <span className="text-sm font-medium">Donation Contract:</span>
                 <p className="text-xs text-muted-foreground font-mono break-all">
-                  {process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x1234567890123456789012345678901234567890"}
+                  {process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x0f804BB7b789fd677b75eF50fBAb708E0945bF1b"}
                 </p>
               </div>
               
               <div>
                 <span className="text-sm font-medium">Impact Pass NFT:</span>
                 <p className="text-xs text-muted-foreground font-mono break-all">
-                  {process.env.NEXT_PUBLIC_IMPACT_PASS_ADDRESS || "0x0987654321098765432109876543210987654321"}
+                  {process.env.NEXT_PUBLIC_IMPACT_PASS_ADDRESS || "0x95FcDB9aE90941CCC60a685ad9957FdEca8742F6"}
                 </p>
               </div>
               

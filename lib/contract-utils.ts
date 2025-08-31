@@ -36,8 +36,8 @@ export async function getImpactPassContract() {
 export async function getStablecoinContract() {
   const signer = await getSigner()
   return new ethers.Contract(
-    CONTRACTS.MOCK_STABLECOIN.address,
-    CONTRACTS.MOCK_STABLECOIN.abi,
+    SUPPORTED_TOKENS.MOCK_USDC.address,
+    SUPPORTED_TOKENS.MOCK_USDC.abi,
     signer
   )
 }

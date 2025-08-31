@@ -172,7 +172,8 @@ export const IMPACT_PASS_NFT_ABI = [
   }
 ] as const
 
-export const MOCK_STABLECOIN_ABI = [
+// Standard ERC20 ABI for stablecoin interactions
+export const ERC20_ABI = [
   {
     "type": "function",
     "name": "allowance",
@@ -204,13 +205,6 @@ export const MOCK_STABLECOIN_ABI = [
   },
   {
     "type": "function",
-    "name": "decimals",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "mint",
     "inputs": [
       { "name": "to", "type": "address", "internalType": "address" },
@@ -218,84 +212,29 @@ export const MOCK_STABLECOIN_ABI = [
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "name",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "symbol",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "totalSupply",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "transfer",
-    "inputs": [
-      { "name": "to", "type": "address", "internalType": "address" },
-      { "name": "value", "type": "uint256", "internalType": "uint256" }
-    ],
-    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "event",
-    "name": "Approval",
-    "inputs": [
-      { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
-      { "name": "spender", "type": "address", "indexed": true, "internalType": "address" },
-      { "name": "value", "type": "uint256", "indexed": false, "internalType": "uint256" }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "Transfer",
-    "inputs": [
-      { "name": "from", "type": "address", "indexed": true, "internalType": "address" },
-      { "name": "to", "type": "address", "indexed": true, "internalType": "address" },
-      { "name": "value", "type": "uint256", "indexed": false, "internalType": "uint256" }
-    ],
-    "anonymous": false
   }
 ] as const
 
 // Contract addresses - update these with your deployed contract addresses
 export const CONTRACTS = {
   DONATION_CONTRACT: {
-    address: (process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x1234567890123456789012345678901234567890") as `0x${string}`,
+    address: (process.env.NEXT_PUBLIC_DONATION_CONTRACT_ADDRESS || "0x0f804BB7b789fd677b75eF50fBAb708E0945bF1b") as `0x${string}`,
     abi: DONATION_CONTRACT_ABI,
   },
   IMPACT_PASS_NFT: {
-    address: (process.env.NEXT_PUBLIC_IMPACT_PASS_ADDRESS || "0x0987654321098765432109876543210987654321") as `0x${string}`,
+    address: (process.env.NEXT_PUBLIC_IMPACT_PASS_ADDRESS || "0x95FcDB9aE90941CCC60a685ad9957FdEca8742F6") as `0x${string}`,
     abi: IMPACT_PASS_NFT_ABI,
-  },
-  MOCK_STABLECOIN: {
-    address: (process.env.NEXT_PUBLIC_STABLECOIN_ADDRESS || "0xA0b86a33E6441b8435b662303c0f479c7e1d5916") as `0x${string}`,
-    abi: MOCK_STABLECOIN_ABI,
   },
 } as const
 
 // Supported tokens configuration
 export const SUPPORTED_TOKENS = {
   MOCK_USDC: {
-    address: (process.env.NEXT_PUBLIC_STABLECOIN_ADDRESS || "0xA0b86a33E6441b8435b662303c0f479c7e1d5916") as `0x${string}`,
+    address: (process.env.NEXT_PUBLIC_STABLECOIN_ADDRESS || "0x1A55d67647CC5Fa7605a62ab570c0B4B574c429A") as `0x${string}`,
     symbol: "MUSDC",
     decimals: 18,
     name: "Mock USDC",
-    abi: MOCK_STABLECOIN_ABI,
+    abi: ERC20_ABI,
   },
 } as const
 
